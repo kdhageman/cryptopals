@@ -31,7 +31,7 @@ def repeating_key(pt, key):
         key_ctr += 1
     return b''.join(res)
 
-def hamming_dist(a, b):
+def hdist(a, b):
     """
     Computes the hamming distance between two byte arrays
     :param a:
