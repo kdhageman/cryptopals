@@ -1,6 +1,7 @@
 import codecs
 import util.xor as xor
 
+
 def solve():
     input_a = '1c0111001f010100061a024b53535009181c'
     input_b = '686974207468652062756c6c277320657965'

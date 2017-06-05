@@ -1,15 +1,14 @@
 from pkg_resources import resource_string
 
-def read(fname):
+def read_lines(fname):
     """
     Reads the specified file name split up in lines
     :param fname: name of the file
     :return: array of line values
     """
-    f = resource_string('resources', fname)
-    return f.splitlines()
+    return read(fname).splitlines()
 
-def readfull(fname):
+def read(fname):
     """
     Reads the specified file name
     :param fname: name of the file

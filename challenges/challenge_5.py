@@ -7,7 +7,7 @@ import codecs
 def solve():
     pp = pprint.PrettyPrinter(indent=4)
 
-    plaintext = file.readfull("challenge_5")
+    plaintext = file.read("challenge_5")
     key = b'ICE'
 
     encrypted = xor.repeating_key(plaintext, key)
