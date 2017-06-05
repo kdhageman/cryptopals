@@ -6,12 +6,12 @@ import pprint
 
 
 def solve():
+    pp = pprint.PrettyPrinter(indent=4)
+
     a = file.read('challenge_4')
 
     max_accept_vals = 0
     accept = []
-
-    pp = pprint.PrettyPrinter(indent=4)
 
     for i in range(len(a)):
         for j in range(0, 2**8):

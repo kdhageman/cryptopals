@@ -21,3 +21,12 @@ def byte_xor(a, b):
     for a in a:
         res.append(bytes([a ^ b]))
     return b''.join(res)
+
+def repeating_key(pt, key):
+    res = []
+    key_ctr = 0
+
+    for b in pt:
+        res.append(bytes([b ^ key[key_ctr % len(key)]]))
+        key_ctr += 1
+    return b''.join(res)
