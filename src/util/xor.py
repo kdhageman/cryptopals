@@ -30,3 +30,29 @@ def repeating_key(pt, key):
         res.append(bytes([b ^ key[key_ctr % len(key)]]))
         key_ctr += 1
     return b''.join(res)
+
+def hamming_dist(a, b):
+    """
+    Computes the hamming distance between two byte arrays
+    :param a:
+    :param b:
+    :return: the hamming distance, or -1 if the byte arrays are of unequal length
+    """
+    if len(a) != len(b):
+        return -1
+
+    res = 0
+    for i in range(len(a)): # loop over bytes
+        for j in range(0, 8):
+            if get_bit(a[i], j) != get_bit(b[i], j):
+                res += 1
+    return res
+
+def get_bit(byte, n):
+    """
+    Returns the n-th bit of the provided byte (starting from the right)
+    :param byte:
+    :param n: 0-7
+    :return:
+    """
+    return (byte >> n) % 2
