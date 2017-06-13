@@ -1,3 +1,5 @@
+import util.ascii as ascii
+
 def bytes_xor(a, b):
     """
     Returns the XOR of two bytes objects
@@ -22,6 +24,30 @@ def byte_xor(a, b):
         res.append(bytes([a ^ b]))
     return b''.join(res)
 
+def sbxor(ctext):
+    """
+    Compute the best single-byte XOR
+    :param ctext:
+    :return:
+    """
+    max_accept_vals = 0
+    res = []
+    for i in range(0, 2 ** 8):
+        num_accept_vals = 0
+        xor_res = byte_xor(ctext, i)
+        for b in xor_res:
+            if b in ascii.acceptable_values():
+                num_accept_vals += 1
+        # new potential winner
+        if num_accept_vals > max_accept_vals:
+            max_accept_vals = num_accept_vals
+            res = []
+            res.append((i, xor_res))
+        # another potential winner
+        elif num_accept_vals == max_accept_vals:
+            res.append((i, xor_res))
+    return res
+
 def repeating_key(pt, key):
     res = []
     key_ctr = 0
@@ -31,7 +57,7 @@ def repeating_key(pt, key):
         key_ctr += 1
     return b''.join(res)
 
-def hamming_dist(a, b):
+def hdist(a, b):
     """
     Computes the hamming distance between two byte arrays
     :param a:

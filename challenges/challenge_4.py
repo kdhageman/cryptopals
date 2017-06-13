@@ -1,14 +1,14 @@
 import util.file as file
 import util.xor as xor
 import util.ascii as ascii
-import codecs
+import util.convert as convert
 import pprint
 
 
 def solve():
     pp = pprint.PrettyPrinter(indent=4)
 
-    a = file.read('challenge_4')
+    a = file.read_lines('challenge_4')
 
     max_accept_vals = 0
     accept = []
@@ -16,7 +16,7 @@ def solve():
     for i in range(len(a)):
         for j in range(0, 2**8):
             num_accept_vals = 0
-            xor_res = xor.byte_xor(codecs.decode(a[i], 'hex'), j)
+            xor_res = xor.byte_xor(convert.from_hex(a[i]), j)
             for b in xor_res:
                 if b in ascii.acceptable_values():
                     num_accept_vals += 1
