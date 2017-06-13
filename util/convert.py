@@ -14,6 +14,10 @@ def to_hex(input):
     return input.hex()
 
 
+def to_base64(input):
+    return codecs.encode(input, 'base64').strip()
+
+
 def to_bit_string(input):
     """
     Converts a bytes object to a bit string
@@ -27,6 +31,7 @@ def to_bit_string(input):
             binstr = "0"+binstr
         res += binstr
     return res
+
 
 def to_string(input):
     """

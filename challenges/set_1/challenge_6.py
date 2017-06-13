@@ -1,6 +1,4 @@
-import util.file as file
-import util.xor as xor
-import util.convert as convert
+from util import file, crypto, convert
 import pprint
 import numpy as np
 from operator import itemgetter
@@ -18,20 +16,19 @@ def solve():
     ksize = 29
 
     # break plaintext into blocks
-    blocks = break_in_blocks(ct, ksize)
+    blocks = crypto.in_blocks(ct, ksize)
 
     # transpose
     blocks = transpose(blocks)
 
-
     key = []
 
     for block in blocks.values():
-        i = xor.sbxor(block)
+        i = crypto.sbxor(block)
         key.append(i[0][0])
 
     pp.pprint(key)
-    res_bytes = xor.repeating_key(ct, key)
+    res_bytes = crypto.repeating_key(ct, key)
     res = convert.to_string(res_bytes)
     pp.pprint(res)
 
@@ -53,8 +50,8 @@ def top_hdists(plaintext, krange, attempts):
         prev = plaintext[0:ksize]
 
         for i in range(attempts):
-            cur = plaintext[offset:offset+ksize]
-            hdist = xor.hdist(prev, cur)
+            cur = plaintext[offset:offset + ksize]
+            hdist = crypto.hdist(prev, cur)
             hdist_norm = hdist / ksize
             hdists.append(hdist_norm)
             offset += ksize
@@ -65,29 +62,15 @@ def top_hdists(plaintext, krange, attempts):
     return res[0]
 
 
-def break_in_blocks(plaintext, ksize):
-    """
-    Break the plain text in blocks of size ksize
-    :param plaintext:
-    :param ksize:
-    :return:
-    """
-    cur_index = 0
-    res = []
-    while cur_index + ksize < len(plaintext):
-        res.append(plaintext[cur_index:cur_index+ksize])
-        cur_index += ksize
-    return res
-
-
 def transpose(blocks):
     res = {}
-    for block in blocks: # loop over all blocks
-        for i in range(len(block)): # loop over all bytes of block
+    for block in blocks:  # loop over all blocks
+        for i in range(len(block)):  # loop over all bytes of block
             if i not in res:
                 res[i] = []
             res[i].append(block[i])
     return res
 
+
 if __name__ == "__main__":
-        solve()
+    solve()

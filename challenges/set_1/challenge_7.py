@@ -1,5 +1,4 @@
-import util.file as file
-import util.convert as convert
+from util import file, convert
 from Crypto.Cipher import AES
 import pprint
 
@@ -16,4 +15,4 @@ def solve():
 
 
 if __name__ == "__main__":
-        solve()
+    solve()

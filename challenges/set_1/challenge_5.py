@@ -1,6 +1,4 @@
-import util.file as file
-import util.xor as xor
-import util.convert as convert
+from util import file, crypto, convert
 import pprint
 
 
@@ -10,8 +8,9 @@ def solve():
     plaintext = file.read("challenge_5")
     key = b'ICE'
 
-    encrypted = xor.repeating_key(plaintext, key)
+    encrypted = crypto.repeating_key(plaintext, key)
     pp.pprint(convert.to_hex(encrypted))
+
 
 if __name__ == "__main__":
     solve()
