@@ -1,5 +1,6 @@
 import util.ascii as ascii
 
+
 def bytes_xor(a, b):
     """
     Returns the XOR of two bytes objects
@@ -12,6 +13,7 @@ def bytes_xor(a, b):
         res.append(bytes([a ^ b]))
     return b''.join(res)
 
+
 def byte_xor(a, b):
     """
     Returns the XOR of one bytes and one byte object
@@ -23,6 +25,7 @@ def byte_xor(a, b):
     for a in a:
         res.append(bytes([a ^ b]))
     return b''.join(res)
+
 
 def sbxor(ctext):
     """
@@ -48,6 +51,7 @@ def sbxor(ctext):
             res.append((i, xor_res))
     return res
 
+
 def repeating_key(pt, key):
     res = []
     key_ctr = 0
@@ -56,6 +60,7 @@ def repeating_key(pt, key):
         res.append(bytes([b ^ key[key_ctr % len(key)]]))
         key_ctr += 1
     return b''.join(res)
+
 
 def hdist(a, b):
     """
@@ -68,11 +73,12 @@ def hdist(a, b):
         return -1
 
     res = 0
-    for i in range(len(a)): # loop over bytes
+    for i in range(len(a)):  # loop over bytes
         for j in range(0, 8):
             if get_bit(a[i], j) != get_bit(b[i], j):
                 res += 1
     return res
+
 
 def get_bit(byte, n):
     """
@@ -83,16 +89,33 @@ def get_bit(byte, n):
     """
     return (byte >> n) % 2
 
-def in_blocks(plaintext, ksize):
+
+def in_blocks(inp, ksize):
     """
     Break the plain text in blocks of size ksize
-    :param plaintext:
+    :param inp:
     :param ksize:
     :return:
     """
     cur_index = 0
     res = []
-    while cur_index + ksize < len(plaintext):
-        res.append(plaintext[cur_index:cur_index+ksize])
+    while cur_index + ksize < len(inp):
+        res.append(inp[cur_index:cur_index + ksize])
         cur_index += ksize
+    return res
+
+
+def pkcs7_padding(inp, length):
+    """
+    Applies PKCS#7 padding
+    :param inp: the input being padded
+    :param length:
+    :return:
+    """
+    padding_length = length - (len(inp) % length)
+
+    res = inp
+    for i in range(padding_length):
+        res += bytes([padding_length])
+
     return res
