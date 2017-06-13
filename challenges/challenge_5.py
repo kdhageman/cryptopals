@@ -1,7 +1,7 @@
 import util.file as file
 import util.xor as xor
+import util.convert as convert
 import pprint
-import codecs
 
 
 def solve():
@@ -11,7 +11,7 @@ def solve():
     key = b'ICE'
 
     encrypted = xor.repeating_key(plaintext, key)
-    pp.pprint(codecs.encode(encrypted, 'hex'))
+    pp.pprint(convert.shex_to_bytes(encrypted))
 
 if __name__ == "__main__":
     solve()
