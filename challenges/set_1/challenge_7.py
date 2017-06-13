@@ -1,5 +1,4 @@
-from util import file, convert
-from Crypto.Cipher import AES
+from util import file, convert, crypto
 import pprint
 
 pp = pprint.PrettyPrinter(indent=4)
@@ -9,8 +8,7 @@ def solve():
     ct = convert.from_base64(file.read("set_1/challenge_7"))
     key = "YELLOW SUBMARINE"
 
-    aes = AES.new(key, mode=AES.MODE_ECB)
-    pt = aes.decrypt(ct)
+    pt = crypto.aes_ecb_decrypt(ct, key)
     pp.pprint(pt)
 
 

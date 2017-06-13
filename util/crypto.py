@@ -1,3 +1,5 @@
+from Crypto.Cipher import AES
+
 import util.ascii as ascii
 
 
@@ -21,10 +23,10 @@ def byte_xor(a, b):
     :param b: byte
     :return:
     """
-    res = []
+    res = b''
     for a in a:
-        res.append(bytes([a ^ b]))
-    return b''.join(res)
+        res += bytes([a ^ b])
+    return res
 
 
 def sbxor(ctext):
@@ -99,7 +101,7 @@ def in_blocks(inp, ksize):
     """
     cur_index = 0
     res = []
-    while cur_index + ksize < len(inp):
+    while cur_index + ksize <= len(inp):
         res.append(inp[cur_index:cur_index + ksize])
         cur_index += ksize
     return res
@@ -118,4 +120,50 @@ def pkcs7_padding(inp, length):
     for i in range(padding_length):
         res += bytes([padding_length])
 
+    return res
+
+
+def aes_ecb_decrypt(ct, key):
+    aes = AES.new(key, mode=AES.MODE_ECB)
+    return aes.decrypt(ct)
+
+
+def aes_ecb_encrypt(pt, key):
+    aes = AES.new(key, mode=AES.MODE_ECB)
+    return aes.encrypt(pt)
+
+
+def aes_cbc_decrypt(ct, key, iv):
+    """
+    Decrypts the cipher text using AES' CBC mode
+    :param ct: cipher text
+    :param key: decryption key
+    :param iv: initialization vector
+    :return:
+    """
+    res = b''
+    ct_blocks = in_blocks(ct, len(key))
+    for ct_block in ct_blocks:
+        bc_decrypted = aes_ecb_decrypt(ct_block, key)
+        pt_block = bytes_xor(bc_decrypted, iv)
+        iv = ct_block
+        res += pt_block
+    return res
+
+
+def aes_cbc_encrypt(pt, key, iv):
+    """
+    Encrypts the plain text using AES' CBC mode
+    :param pt: plain text
+    :param key: encryption key
+    :param iv: initialization vector
+    :return:
+    """
+    res = b''
+    pt_blocks = in_blocks(pt, len(key))
+    for pt_block in pt_blocks:
+        bc_in = bytes_xor(pt_block, iv)
+        bc_out = aes_ecb_encrypt(bc_in, key)
+        iv = bc_out
+        res += bc_out
     return res
