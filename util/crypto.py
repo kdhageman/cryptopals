@@ -82,3 +82,17 @@ def get_bit(byte, n):
     :return:
     """
     return (byte >> n) % 2
+
+def in_blocks(plaintext, ksize):
+    """
+    Break the plain text in blocks of size ksize
+    :param plaintext:
+    :param ksize:
+    :return:
+    """
+    cur_index = 0
+    res = []
+    while cur_index + ksize < len(plaintext):
+        res.append(plaintext[cur_index:cur_index+ksize])
+        cur_index += ksize
+    return res

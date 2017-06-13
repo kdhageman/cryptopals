@@ -1,5 +1,4 @@
-import util.xor as xor
-import util.convert as convert
+from util import crypto, convert
 
 
 def solve():
@@ -10,9 +9,9 @@ def solve():
     a_bytes = convert.from_hex(input_a)
     b_bytes = convert.from_hex(input_b)
 
-    actual = xor.bytes_xor(a_bytes, b_bytes)
+    actual = crypto.bytes_xor(a_bytes, b_bytes)
     print(actual == expected)
+
 
 if __name__ == "__main__":
     solve()
-
