@@ -16,7 +16,7 @@ def solve():
     for i in range(len(a)):
         for j in range(0, 2**8):
             num_accept_vals = 0
-            xor_res = xor.byte_xor(convert.shex_to_bytes(a[i]), j)
+            xor_res = xor.byte_xor(convert.from_hex(a[i]), j)
             for b in xor_res:
                 if b in ascii.acceptable_values():
                     num_accept_vals += 1

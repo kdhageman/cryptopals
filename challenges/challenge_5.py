@@ -11,7 +11,7 @@ def solve():
     key = b'ICE'
 
     encrypted = xor.repeating_key(plaintext, key)
-    pp.pprint(convert.shex_to_bytes(encrypted))
+    pp.pprint(convert.to_hex(encrypted))
 
 if __name__ == "__main__":
     solve()
