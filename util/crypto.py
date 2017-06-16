@@ -1,6 +1,7 @@
 from Crypto.Cipher import AES
 
 import util.ascii as ascii
+import random
 
 
 def bytes_xor(a, b):
@@ -101,20 +102,23 @@ def in_blocks(inp, ksize):
     """
     cur_index = 0
     res = []
-    while cur_index + ksize <= len(inp):
-        res.append(inp[cur_index:cur_index + ksize])
+    while cur_index < len(inp):
+        last_index = min(cur_index + ksize, len(inp))
+        res.append(inp[cur_index:last_index])
         cur_index += ksize
     return res
 
 
-def pkcs7_padding(inp, length):
+def pkcs7_padding(inp, lpadding):
     """
     Applies PKCS#7 padding
     :param inp: the input being padded
-    :param length:
+    :param lpadding: length of the padded output
     :return:
     """
-    padding_length = length - (len(inp) % length)
+    if len(inp) % lpadding == 0:
+        return inp
+    padding_length = lpadding - (len(inp) % lpadding)
 
     res = inp
     for i in range(padding_length):
@@ -130,7 +134,7 @@ def aes_ecb_decrypt(ct, key):
 
 def aes_ecb_encrypt(pt, key):
     aes = AES.new(key, mode=AES.MODE_ECB)
-    return aes.encrypt(pt)
+    return aes.encrypt(pkcs7_padding(pt, 16))
 
 
 def aes_cbc_decrypt(ct, key, iv):
@@ -166,4 +170,39 @@ def aes_cbc_encrypt(pt, key, iv):
         bc_out = aes_ecb_encrypt(bc_in, key)
         iv = bc_out
         res += bc_out
+    return res
+
+
+def randbytes(size):
+    """
+    Creates random bytes of size
+    :param size: size of the returned bytes object
+    """
+    res = b''
+    for i in range(size):
+        rand_byte = random.randrange(256)
+        res += bytes([rand_byte])
+    return res
+
+
+def encryption_oracle(inp):
+    """
+    Implements a random encryption oracle;
+    first appends and prepends 5-10 random bytes to the plaintext,
+    then encrypts the result with either CBC or ECB (with 1/2 probability each)
+    :param inp:
+    :return:
+    """
+    prepend_size = random.randrange(5, 10)
+    append_size = random.randrange(5, 10)
+    inp = randbytes(prepend_size) + inp + randbytes(append_size)
+
+    key = randbytes(16)
+
+    res = None
+    if random.randrange(2) == 1:  # CBC
+        iv = randbytes(16)
+        res = aes_cbc_encrypt(inp, key, iv)
+    else:  # ECB
+        res = aes_ecb_encrypt(inp, key)
     return res
