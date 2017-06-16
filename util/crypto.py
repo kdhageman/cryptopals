@@ -200,11 +200,9 @@ def encryption_oracle(inp):
     key = randbytes(16)
 
     res = None
-    if random.randrange(2) == 1:
-        # CBC
+    if random.randrange(2) == 1:  # CBC
         iv = randbytes(16)
         res = aes_cbc_encrypt(inp, key, iv)
-    else:
-        # ECB
+    else:  # ECB
         res = aes_ecb_encrypt(inp, key)
     return res
