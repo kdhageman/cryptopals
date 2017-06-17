@@ -1,7 +1,10 @@
 from Crypto.Cipher import AES
 
-import util.ascii as ascii
+from util import ascii, file, convert
+from util.modes import Mode
 import random
+
+consistent_key = 0 * 16
 
 
 def bytes_xor(a, b):
@@ -185,7 +188,7 @@ def randbytes(size):
     return res
 
 
-def encryption_oracle(inp):
+def encrypt_oracle(inp):
     """
     Implements a random encryption oracle;
     first appends and prepends 5-10 random bytes to the plaintext,
@@ -206,3 +209,31 @@ def encryption_oracle(inp):
     else:  # ECB
         res = aes_ecb_encrypt(inp, key)
     return res
+
+
+def detect_mode(func):
+    """
+    Detects the encryption mode of the provided function; either Mode.ECB or Mode.CBC
+    :param func:
+    :return:
+    """
+    pt = b'0' * 64
+    ct = func(pt)
+
+    second_block = ct[16:32]
+    third_block = ct[32:48]
+    if second_block == third_block:
+        return Mode.ECB
+    else:
+        return Mode.CBC
+
+
+def encrypt_oracle_consistent(inp):
+    append_bytes = convert.from_base64(file.read("set_2/challenge_12"))
+    key = consistent_key
+    return aes_ecb_encrypt(inp + append_bytes, key)
+
+
+def set_consistent_key():
+    global consistent_key
+    consistent_key = randbytes(16)
