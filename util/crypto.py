@@ -4,8 +4,7 @@ from util import ascii, file, convert
 from util.modes import Mode
 import random
 
-consistent_key = 0 * 16
-
+global_key = 0 * 16
 
 def bytes_xor(a, b):
     """
@@ -131,11 +130,23 @@ def pkcs7_padding(inp, lpadding):
 
 
 def aes_ecb_decrypt(ct, key):
+    """
+    Decrypts the cipher text using AES ECB mode
+    :param ct: cipher text
+    :param key: decryption key
+    :return: plain text
+    """
     aes = AES.new(key, mode=AES.MODE_ECB)
     return aes.decrypt(ct)
 
 
 def aes_ecb_encrypt(pt, key):
+    """
+    Encrypts the plain text using AES ECB mode
+    :param pt: plain text
+    :param key: encryption key
+    :return: cipher text
+    """
     aes = AES.new(key, mode=AES.MODE_ECB)
     return aes.encrypt(pkcs7_padding(pt, 16))
 
@@ -146,7 +157,7 @@ def aes_cbc_decrypt(ct, key, iv):
     :param ct: cipher text
     :param key: decryption key
     :param iv: initialization vector
-    :return:
+    :return: plain text
     """
     res = b''
     ct_blocks = in_blocks(ct, len(key))
@@ -190,11 +201,9 @@ def randbytes(size):
 
 def encrypt_oracle(inp):
     """
-    Implements a random encryption oracle;
-    first appends and prepends 5-10 random bytes to the plaintext,
-    then encrypts the result with either CBC or ECB (with 1/2 probability each)
-    :param inp:
-    :return:
+    Implements a random encryption oracle (challenge 11);
+    :param inp: plaintext to encrypt
+    :return: ciphertext
     """
     prepend_size = random.randrange(5, 10)
     append_size = random.randrange(5, 10)
@@ -202,7 +211,6 @@ def encrypt_oracle(inp):
 
     key = randbytes(16)
 
-    res = None
     if random.randrange(2) == 1:  # CBC
         iv = randbytes(16)
         res = aes_cbc_encrypt(inp, key, iv)
@@ -211,10 +219,21 @@ def encrypt_oracle(inp):
     return res
 
 
+def encrypt_oracle_consistent(inp):
+    """
+    Implements a consistent encryption oracle (challenge 12)
+    :param inp: plaintext to encrypt
+    :return: ciphertext
+    """
+    append_bytes = convert.from_base64(file.read("set_2/challenge_12"))
+    key = global_key
+    return aes_ecb_encrypt(inp + append_bytes, key)
+
+
 def detect_mode(func):
     """
-    Detects the encryption mode of the provided function; either Mode.ECB or Mode.CBC
-    :param func:
+    Detects the encryption mode of the provided function
+    :param func: Mode.ECB or Mode.CBC
     :return:
     """
     pt = b'0' * 64
@@ -228,12 +247,10 @@ def detect_mode(func):
         return Mode.CBC
 
 
-def encrypt_oracle_consistent(inp):
-    append_bytes = convert.from_base64(file.read("set_2/challenge_12"))
-    key = consistent_key
-    return aes_ecb_encrypt(inp + append_bytes, key)
-
-
-def set_consistent_key():
-    global consistent_key
-    consistent_key = randbytes(16)
+def set_global_key():
+    """
+    Sets the global encryption key
+    :return:
+    """
+    global global_key
+    global_key = randbytes(16)

@@ -3,7 +3,7 @@ from util.modes import Mode
 
 
 def solve():
-    crypto.set_consistent_key()
+    crypto.set_global_key()
     bs = detect_block_size()
 
     if crypto.detect_mode(crypto.encrypt_oracle_consistent) != Mode.ECB:
