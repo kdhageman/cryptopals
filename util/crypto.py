@@ -8,6 +8,8 @@ import random
 global_key = b' ' * 16
 global_prefix = b' ' * 8
 
+s_block = 16
+
 
 def bytes_xor(a, b):
     """
@@ -151,7 +153,7 @@ def del_padding(inp, s_block):
     for p in padding:
         if p != s_padding:
             raise PaddingException("Invalid PKCS#7 padding: padding value not equal to size")
-    return inp[:s_block-s_padding]
+    return inp[:s_block - s_padding]
 
 
 def aes_ecb_decrypt(ct, key):
@@ -173,7 +175,7 @@ def aes_ecb_encrypt(pt, key):
     :return: cipher text
     """
     aes = AES.new(key, mode=AES.MODE_ECB)
-    return aes.encrypt(add_padding(pt, 16))
+    return aes.encrypt(add_padding(pt, s_block))
 
 
 def aes_cbc_decrypt(ct, key, iv):
@@ -234,10 +236,10 @@ def encrypt_oracle(inp):
     append_size = random.randrange(5, 10)
     inp = randbytes(prepend_size) + inp + randbytes(append_size)
 
-    key = randbytes(16)
+    key = randbytes(s_block)
 
     if random.randrange(2) == 1:  # CBC
-        iv = randbytes(16)
+        iv = randbytes(s_block)
         res = aes_cbc_encrypt(inp, key, iv)
     else:  # ECB
         res = aes_ecb_encrypt(inp, key)
@@ -273,21 +275,24 @@ def detect_mode(func):
     pt = b'0' * 64
     ct = func(pt)
 
-    second_block = ct[16:32]
-    third_block = ct[32:48]
+    second_block = ct[s_block:s_block * 2]
+    third_block = ct[s_block * 2:s_block * 3]
     if second_block == third_block:
         return Mode.ECB
     else:
         return Mode.CBC
 
 
+##########################################
+# -------- SET GLOBAL VARIABLES -------- #
+##########################################
 def set_global_key():
     """
     Sets the global encryption key
     :return:
     """
     global global_key
-    global_key = randbytes(16)
+    global_key = randbytes(s_block)
 
 
 def set_global_prefix():
@@ -296,5 +301,5 @@ def set_global_prefix():
     :return:
     """
     global global_prefix
-    size = random.randrange(1, 16)
+    size = random.randrange(1, s_block)
     global_prefix = randbytes(size)
