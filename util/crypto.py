@@ -4,7 +4,9 @@ from util import ascii, file, convert
 from util.modes import Mode
 import random
 
-global_key = 0 * 16
+global_key = b' ' * 16
+global_prefix = b' ' * 8
+
 
 def bytes_xor(a, b):
     """
@@ -219,7 +221,7 @@ def encrypt_oracle(inp):
     return res
 
 
-def encrypt_oracle_consistent(inp):
+def encrypt_oracle_consistent_12(inp):
     """
     Implements a consistent encryption oracle (challenge 12)
     :param inp: plaintext to encrypt
@@ -228,6 +230,15 @@ def encrypt_oracle_consistent(inp):
     append_bytes = convert.from_base64(file.read("set_2/challenge_12"))
     key = global_key
     return aes_ecb_encrypt(inp + append_bytes, key)
+
+
+def encrypt_oracle_consistent_14(inp):
+    """
+    Implements a consistent encryption oracle with random prefix (challenge 14)
+    :param inp: plaintext to encrypt
+    :return: ciphertext
+    """
+    return encrypt_oracle_consistent_12(global_prefix + inp)
 
 
 def detect_mode(func):
@@ -254,3 +265,13 @@ def set_global_key():
     """
     global global_key
     global_key = randbytes(16)
+
+
+def set_global_prefix():
+    """
+    Sets the global random prefix
+    :return:
+    """
+    global global_prefix
+    size = random.randrange(1, 16)
+    global_prefix = randbytes(size)
