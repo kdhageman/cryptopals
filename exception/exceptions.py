@@ -4,3 +4,7 @@ class CryptoException(Exception):
 
 class NotFoundException(Exception):
     pass
+
+
+class PaddingException(Exception):
+    pass
