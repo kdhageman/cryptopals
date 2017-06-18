@@ -6,11 +6,16 @@ role = 'user'
 
 
 def solve():
-    pt = "{}@bar.com".format("a" * 5)
-    ct = profile_for(pt)
+    # create a cipher text block consisting of only "admin" (with trailing spaces which will be stripped)
+    malicious_pt = " " * 10 + "admin" + " " * 11
+    malicious_ct = profile_for(malicious_pt)[16:32]
 
-    pt = __decrypt(ct)
+    # create the base ciphertext, where the 'user' role is in block [32:48]
+    base_pt = "f{}@bar.com".format("o" * 4)
+    base_ct = profile_for(base_pt)[0:32]
 
+    # replace the 'user' role with the 'admin' role
+    pt = __decrypt(base_ct + malicious_ct)
     print(pt)
 
 
