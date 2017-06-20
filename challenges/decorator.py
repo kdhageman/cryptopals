@@ -1,3 +1,5 @@
+from time import time
+
 challenges = {}
 
 
@@ -8,7 +10,11 @@ def challenge(n):
             print("| Challenge {} |".format(n))
             print("+" + ("-" * (12 + __numdigits(n))) + "+")
             print()
+            t_begin = time()
             f(*args, **kwargs)
+            passed = time() - t_begin
+            print()
+            print("Took {:.1f} ms".format(passed*1000))
 
         challenges[n] = wrapper
         return wrapper
