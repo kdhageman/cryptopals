@@ -1,15 +1,18 @@
-from util import file, convert, crypto
-import pprint
+from util import file, convert, aes
+from challenges.decorator import challenge, expect
 
-pp = pprint.PrettyPrinter(indent=4)
+CT = convert.from_base64(file.read("set_1/challenge_7"))
+EXPECTED = convert.from_base64(file.read("set_1/challenge_7_expected"))
+KEY = "YELLOW SUBMARINE"
 
 
+@challenge(7)
 def solve():
-    ct = convert.from_base64(file.read("set_1/challenge_7"))
-    key = "YELLOW SUBMARINE"
+    pt = aes.ecb_decrypt(CT, KEY)
 
-    pt = crypto.aes_ecb_decrypt(ct, key)
-    pp.pprint(pt)
+    expect(pt, EXPECTED)
+
+    print(convert.to_string(pt))
 
 
 if __name__ == "__main__":
