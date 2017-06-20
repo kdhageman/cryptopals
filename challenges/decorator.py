@@ -1,4 +1,5 @@
 from time import time
+from exception.exceptions import UnexpectException
 
 challenges = {}
 
@@ -14,7 +15,7 @@ def challenge(n):
             f(*args, **kwargs)
             passed = time() - t_begin
             print()
-            print("Took {:.1f} ms".format(passed*1000))
+            print("Took {:.1f} ms".format(passed * 1000))
 
         challenges[n] = wrapper
         return wrapper
@@ -24,11 +25,18 @@ def challenge(n):
 
 def expect(actual, expected):
     if actual != expected:
-        print("Failed:")
-        print("  Expected: {}".format(expected))
-        print("  Actual:   {}".format(actual))
-        return False
-    return True
+        msg = "Failed:\n"
+        msg += "  Expected: {}\n".format(expected)
+        msg += "  Actual:   {}".format(actual)
+        raise UnexpectException(msg)
+
+
+def contains(item, l):
+    if item not in l:
+        msg = "Failed:\n"
+        msg += "  Expected: {}\n".format(l)
+        msg += "  Actual:   {}".format(item)
+        raise UnexpectException(msg)
 
 
 def __numdigits(n):

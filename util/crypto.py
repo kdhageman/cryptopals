@@ -44,21 +44,21 @@ def sbxor(ctext):
     :return:
     """
     max_accept_vals = 0
-    res = []
+    candidates = []
     for i in range(0, 2 ** 8):
         num_accept_vals = 0
         xor_res = byte_xor(ctext, i)
         for b in xor_res:
             if b in ascii.acceptable_values():
                 num_accept_vals += 1
-        # new potential winner
+        # new candidate byte
         if num_accept_vals > max_accept_vals:
             max_accept_vals = num_accept_vals
-            res = [xor_res]
-        # another potential winner
+            candidates = [i]
+        # another candidate byte
         elif num_accept_vals == max_accept_vals:
-            res.append(xor_res)
-    return res
+            candidates.append(i)
+    return candidates
 
 
 def repeating_key(pt, key):

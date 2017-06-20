@@ -8,3 +8,7 @@ class NotFoundException(Exception):
 
 class PaddingException(Exception):
     pass
+
+
+class UnexpectException(Exception):
+    pass
