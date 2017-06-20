@@ -1,10 +1,11 @@
-from util import crypto
+from util import crypto, aes, pkcs7, convert
+from challenges.decorator import challenge, contains
 
-s_block = 16
-iv = bytes([0]) * s_block
-key = crypto.randbytes(s_block)
+IV = bytes([0]) * aes.S_BLOCK
+KEY = crypto.randbytes(aes.S_BLOCK)
 
 
+@challenge(16)
 def solve():
     pt = " admin true"
 
@@ -13,7 +14,8 @@ def solve():
         for j in range(256):
             new_ct = ct[0:16] + bytes([i]) + ct[17:22] + bytes([j]) + ct[23:]
             if contains_admin(new_ct):
-                pt = crypto.aes_cbc_decrypt(new_ct, key, iv)
+                pt = aes.cbc_decrypt(new_ct, KEY, IV)
+                contains(b';admin=true;', pt)
                 print(pt)
                 return
     print("Error: failed to find solution")
@@ -32,10 +34,10 @@ def encrypt(inp):
     pt = inp.replace(";", "").replace("=", "")  # remove invalid character
     pt = prefix + pt + suffix  # add prefix and suffix
     pt_encoded = pt.encode("utf-8")
-    pt_padded = crypto.add_padding(pt_encoded, s_block)
+    pt_padded = pkcs7.add(pt_encoded, aes.S_BLOCK)
 
     # encrypt
-    ct = crypto.aes_cbc_encrypt(pt_padded, key, iv)
+    ct = aes.cbc_encrypt(pt_padded, KEY, IV)
 
     return ct
 
@@ -47,7 +49,7 @@ def contains_admin(ct):
     :param key: decryption key
     :return: true if plaintext contains admin tuple; false otherwise
     """
-    pt = crypto.aes_cbc_decrypt(ct, key, iv)
+    pt = aes.cbc_decrypt(ct, KEY, IV)
     return b";admin=true;" in pt
 
 

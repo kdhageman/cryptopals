@@ -10,5 +10,5 @@ class PaddingException(Exception):
     pass
 
 
-class UnexpectException(Exception):
+class CompareException(Exception):
     pass
