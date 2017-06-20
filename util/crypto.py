@@ -54,11 +54,10 @@ def sbxor(ctext):
         # new potential winner
         if num_accept_vals > max_accept_vals:
             max_accept_vals = num_accept_vals
-            res = []
-            res.append((i, xor_res))
+            res = [xor_res]
         # another potential winner
         elif num_accept_vals == max_accept_vals:
-            res.append((i, xor_res))
+            res.append(xor_res)
     return res
 
 
