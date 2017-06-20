@@ -1,28 +1,23 @@
 from exception.exceptions import CryptoException, NotFoundException
-from util import crypto, convert
+from util import crypto, convert, file
 from util.modes import Mode
+from challenges.decorator import challenge, expect
 
 BYTE = b'A'
 NULL_BYTE = b''
 
+EXPECTED = convert.from_base64(file.read("set_2/challenge_12_expected"))
 
+@challenge(12)
 def solve():
     crypto.set_global_key()  # set the global encryption key
-    try:
-        s_block = detect_s_block()  # find the block size of the cipher
-    except CryptoException as e:
-        print(e.args[0])
-        return
 
-    if crypto.detect_mode(crypto.encrypt_oracle_consistent_12) != Mode.ECB:  # validate that ECB mode is used
-        print("Error!")
-        return
+    s_block = detect_s_block()  # find the block size of the cipher
 
-    try:
-        unknown = get_unknown_string(s_block)  # retrieve the unknown string
-    except NotFoundException as e:
-        print(e.args[0])
-        return
+    expect(crypto.detect_mode(crypto.encrypt_oracle_consistent_12), Mode.ECB) # validate that ECB mode is used
+
+    unknown = get_unknown_string(s_block)  # retrieve the unknown string
+    expect(unknown, EXPECTED)
 
     print(convert.to_string(unknown))
 
@@ -51,7 +46,8 @@ def get_unknown_string(s_block):
                 ct = crypto.encrypt_oracle_consistent_12(pt)
                 ct_dict[ct[offset:offset + s_block]] = i
 
-            if incomplete_ct[offset:offset + s_block] not in ct_dict:  # cannot match any of the 256 possible bytes; end has been found
+            if incomplete_ct[
+               offset:offset + s_block] not in ct_dict:  # cannot match any of the 256 possible bytes; end has been found
                 return unknown
             unknown += bytes(
                 [ct_dict[incomplete_ct[offset:offset + s_block]]])  # add found byte to the end of the unknown string

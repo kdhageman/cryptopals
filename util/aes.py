@@ -12,7 +12,7 @@ def ecb_decrypt(ct, key):
     :return: plain text
     """
     aes = AES.new(key, mode=AES.MODE_ECB)
-    return aes.decrypt(ct).strip()
+    return aes.decrypt(ct)
 
 
 def ecb_encrypt(pt, key):

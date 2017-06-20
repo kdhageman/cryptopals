@@ -1,5 +1,5 @@
 from time import time
-from exception.exceptions import UnexpectException
+from exception.exceptions import CompareException
 
 challenges = {}
 
@@ -28,7 +28,7 @@ def expect(actual, expected):
         msg = "Failed:\n"
         msg += "  Expected: {}\n".format(expected)
         msg += "  Actual:   {}".format(actual)
-        raise UnexpectException(msg)
+        raise CompareException(msg)
 
 
 def contains(item, l):
@@ -36,7 +36,7 @@ def contains(item, l):
         msg = "Failed:\n"
         msg += "  Expected: {}\n".format(l)
         msg += "  Actual:   {}".format(item)
-        raise UnexpectException(msg)
+        raise CompareException(msg)
 
 
 def __numdigits(n):

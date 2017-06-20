@@ -1,10 +1,12 @@
-from util import parser, crypto, convert
+from util import parser, crypto, convert, aes
+from challenges.decorator import challenge, expect, contains
 
-key = crypto.randbytes(16)
-uid = 10
-role = 'user'
+KEY = crypto.randbytes(16)
+UID = 10
+ROLE = 'user'
 
 
+@challenge(13)
 def solve():
     # create a cipher text block consisting of only "admin" (with trailing spaces which will be stripped)
     malicious_pt = " " * 10 + "admin" + " " * 11
@@ -16,6 +18,9 @@ def solve():
 
     # replace the 'user' role with the 'admin' role
     pt = __decrypt(base_ct + malicious_ct)
+    contains('role', pt)
+    expect(pt['role'].strip(), 'admin')
+
     print(pt)
 
 
@@ -26,12 +31,12 @@ def profile_for(inp):
 
 
 def __encrypt(pt):
-    ct = crypto.aes_ecb_encrypt(str.encode(pt), key)
+    ct = aes.ecb_encrypt(str.encode(pt), KEY)
     return ct
 
 
 def __decrypt(ct):
-    pt = crypto.aes_ecb_decrypt(ct, key)
+    pt = aes.ecb_decrypt(ct, KEY)
     pt = convert.to_string(pt)
     return parser.parse_kv(pt)
 

@@ -1,10 +1,14 @@
-from util import crypto, convert
+from util import crypto, convert, file
 from exception.exceptions import NotFoundException
+from challenges.decorator import challenge, expect
 
 BYTE = b'A'
 NULL_BYTE = b''
 
+EXPECTED = convert.from_base64(file.read("set_2/challenge_12_expected"))
 
+
+@challenge(14)
 def solve():
     s_block = 16
 
@@ -14,6 +18,8 @@ def solve():
     prefix_size = get_s_prefix(s_block)
 
     pt = get_unknown_string(prefix_size, s_block)
+    expect(pt, EXPECTED)
+
     print(convert.to_string(pt))
 
 
@@ -58,7 +64,8 @@ def get_unknown_string(s_prefix, s_block):
                 ct = crypto.encrypt_oracle_consistent_14(pt)
                 ct_dict[ct[offset:offset + s_block]] = i
 
-            if incomplete_ct[offset:offset + s_block] not in ct_dict:  # cannot match any of the 256 possible bytes; end has been found
+            if incomplete_ct[
+               offset:offset + s_block] not in ct_dict:  # cannot match any of the 256 possible bytes; end has been found
                 return unknown
             unknown += bytes(
                 [ct_dict[incomplete_ct[offset:offset + s_block]]])  # add found byte to the end of the unknown string
