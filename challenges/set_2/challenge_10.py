@@ -1,13 +1,20 @@
-from util import crypto, file, convert
+from util import aes, file, convert
+from challenges.decorator import challenge, expect
+
+CT_ORIGINAL = convert.from_base64(file.read("set_2/challenge_10"))
+EXPECTED = convert.from_base64(file.read("set_2/challenge_10_expected"))
 
 
+@challenge(10)
 def solve():
-    ct_original = convert.from_base64(file.read("set_2/challenge_10"))
     key = b"YELLOW SUBMARINE"
     iv = bytes(16)
 
-    pt = crypto.aes_cbc_decrypt(ct_original, key, iv)
+    pt = aes.cbc_decrypt(CT_ORIGINAL, key, iv)
+    expect(pt, EXPECTED)
+
     print(convert.to_string(pt))
+
 
 if __name__ == "__main__":
     solve()
