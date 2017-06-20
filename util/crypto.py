@@ -1,14 +1,10 @@
-from Crypto.Cipher import AES
-
-from exception.exceptions import PaddingException
 from util import ascii, file, convert
 from util.modes import Mode
+from util import aes
 import random
 
 global_key = b' ' * 16
 global_prefix = b' ' * 8
-
-s_block = 16
 
 
 def bytes_xor(a, b):
@@ -44,22 +40,21 @@ def sbxor(ctext):
     :return:
     """
     max_accept_vals = 0
-    res = []
+    candidates = []
     for i in range(0, 2 ** 8):
         num_accept_vals = 0
         xor_res = byte_xor(ctext, i)
         for b in xor_res:
             if b in ascii.acceptable_values():
                 num_accept_vals += 1
-        # new potential winner
+        # new candidate byte
         if num_accept_vals > max_accept_vals:
             max_accept_vals = num_accept_vals
-            res = []
-            res.append((i, xor_res))
-        # another potential winner
+            candidates = [i]
+        # another candidate byte
         elif num_accept_vals == max_accept_vals:
-            res.append((i, xor_res))
-    return res
+            candidates.append(i)
+    return candidates
 
 
 def repeating_key(pt, key):
@@ -116,104 +111,6 @@ def in_blocks(inp, ksize):
     return res
 
 
-def add_padding(inp, s_block):
-    """
-    Applies PKCS#7 padding
-    :param inp: the input being padded
-    :param s_block: block size
-    :return:
-    """
-    if len(inp) % s_block == 0:
-        return inp
-    padding_length = s_block - (len(inp) % s_block)
-
-    res = inp
-    for i in range(padding_length):
-        res += bytes([padding_length])
-
-    return res
-
-
-def del_padding(inp, s_block):
-    """
-    Removes the PKCS#7 padding, or raises exception if invalid padding
-    :param inp: input whose padding is being removed
-    :param s_block: the block size
-    :return:
-    """
-    s_padding = inp[-1]
-
-    if len(inp) % s_block != 0:
-        raise PaddingException("Invalid PKCS#7 padding: input should be multiple of {}".format(s_block))
-
-    if s_padding >= s_block:
-        raise PaddingException("Invalid PKCS#7 padding: wrong size")
-
-    padding = inp[-s_padding:]
-    for p in padding:
-        if p != s_padding:
-            raise PaddingException("Invalid PKCS#7 padding: padding value not equal to size")
-    return inp[:s_block - s_padding]
-
-
-def aes_ecb_decrypt(ct, key):
-    """
-    Decrypts the cipher text using AES ECB mode
-    :param ct: cipher text
-    :param key: decryption key
-    :return: plain text
-    """
-    aes = AES.new(key, mode=AES.MODE_ECB)
-    return aes.decrypt(ct).strip()
-
-
-def aes_ecb_encrypt(pt, key):
-    """
-    Encrypts the plain text using AES ECB mode
-    :param pt: plain text
-    :param key: encryption key
-    :return: cipher text
-    """
-    aes = AES.new(key, mode=AES.MODE_ECB)
-    return aes.encrypt(add_padding(pt, s_block))
-
-
-def aes_cbc_decrypt(ct, key, iv):
-    """
-    Decrypts the cipher text using AES' CBC mode
-    :param ct: cipher text
-    :param key: decryption key
-    :param iv: initialization vector
-    :return: plain text
-    """
-    res = b''
-    ct_blocks = in_blocks(ct, len(key))
-    for ct_block in ct_blocks:
-        bc_decrypted = aes_ecb_decrypt(ct_block, key)
-        pt_block = bytes_xor(bc_decrypted, iv)
-        iv = ct_block
-        res += pt_block
-    return res
-
-
-def aes_cbc_encrypt(pt, key, iv):
-    """
-    Encrypts the plain text using AES' CBC mode
-    :param pt: plain text
-    :param key: encryption key
-    :param iv: initialization vector
-    :return:
-    """
-    res = b''
-    pt_blocks = in_blocks(pt, len(key))
-    for pt_block in pt_blocks:
-        bc_in = bytes_xor(pt_block, iv)
-        bc_out = aes_ecb_encrypt(bc_in, key)
-        iv = bc_out
-        res += bc_out
-    return res
-
-
 def randbytes(size):
     """
     Creates random bytes of size
@@ -236,13 +133,13 @@ def encrypt_oracle(inp):
     append_size = random.randrange(5, 10)
     inp = randbytes(prepend_size) + inp + randbytes(append_size)
 
-    key = randbytes(s_block)
+    key = randbytes(aes.S_BLOCK)
 
     if random.randrange(2) == 1:  # CBC
-        iv = randbytes(s_block)
-        res = aes_cbc_encrypt(inp, key, iv)
+        iv = randbytes(aes.S_BLOCK)
+        res = aes.cbc_encrypt(inp, key, iv)
     else:  # ECB
-        res = aes_ecb_encrypt(inp, key)
+        res = aes.ecb_encrypt(inp, key)
     return res
 
 
@@ -254,7 +151,7 @@ def encrypt_oracle_consistent_12(inp):
     """
     append_bytes = convert.from_base64(file.read("set_2/challenge_12"))
     key = global_key
-    return aes_ecb_encrypt(inp + append_bytes, key)
+    return aes.ecb_encrypt(inp + append_bytes, key)
 
 
 def encrypt_oracle_consistent_14(inp):
@@ -275,8 +172,8 @@ def detect_mode(func):
     pt = b'0' * 64
     ct = func(pt)
 
-    second_block = ct[s_block:s_block * 2]
-    third_block = ct[s_block * 2:s_block * 3]
+    second_block = ct[aes.S_BLOCK:aes.S_BLOCK * 2]
+    third_block = ct[aes.S_BLOCK * 2:aes.S_BLOCK * 3]
     if second_block == third_block:
         return Mode.ECB
     else:
@@ -292,7 +189,7 @@ def set_global_key():
     :return:
     """
     global global_key
-    global_key = randbytes(s_block)
+    global_key = randbytes(aes.S_BLOCK)
 
 
 def set_global_prefix():
@@ -301,5 +198,5 @@ def set_global_prefix():
     :return:
     """
     global global_prefix
-    size = random.randrange(1, s_block)
+    size = random.randrange(1, aes.S_BLOCK)
     global_prefix = randbytes(size)
