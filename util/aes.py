@@ -60,3 +60,20 @@ def cbc_encrypt(pt, key, iv):
         iv = bc_out
         res += bc_out
     return res
+
+def is_encrypted(ct):
+    """
+    Returns whether the provided ciphertext is encrypted with AES
+    :param ct: ciphertext
+    :return: true if ciphertext is encrypted with AES
+    """
+    res = False
+
+    blocks = crypto.in_blocks(ct, 16)
+
+    for block in blocks:
+        counts = blocks.count(block)
+        if counts > 1:
+            res = True
+            break
+    return res
